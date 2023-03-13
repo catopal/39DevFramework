@@ -15,8 +15,8 @@ namespace DevFramework.Core.Aspects.Postsharp.LogAspects
     [MulticastAttributeUsage(MulticastTargets.Method,TargetMemberAttributes = MulticastAttributes.Instance)]
     public class LogAspect:OnMethodBoundaryAspect
     {
-        Type _loggerType;
-        LoggerService _loggerService;
+        private Type _loggerType;
+        private LoggerService _loggerService;
 
         public LogAspect(Type loggerType)
         {
@@ -36,7 +36,7 @@ namespace DevFramework.Core.Aspects.Postsharp.LogAspects
 
         public override void OnEntry(MethodExecutionArgs args)
         {
-            if (!_loggerService.IsErrorEnabled)
+            if (!_loggerService.IsInfoEnabled)
             {
                 return;
             }
@@ -51,7 +51,7 @@ namespace DevFramework.Core.Aspects.Postsharp.LogAspects
 
                 var logDetail = new LogDetail
                 {
-                    FullName = args.Method.DeclaringType == null ? null : args.Method.DeclaringType.FullName,
+                    FullName = args.Method.DeclaringType == null ? null : args.Method.DeclaringType.Name,
                     MethodName = args.Method.Name,
                     Parameters = logParameters
                 };

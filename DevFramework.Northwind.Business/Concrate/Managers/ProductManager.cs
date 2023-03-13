@@ -7,11 +7,14 @@ using DevFramework.Core.Aspects.Postsharp.TransactionAspects;
 using DevFramework.Core.Aspects.Postsharp.ValidationAspects;
 using DevFramework.Core.Aspects.Postsharp.CacheAspects;
 using DevFramework.Core.CrossCuttingConcerns.Caching.Microsoft;
-using DevFramework.Core.CrossCuttingConcerns.Logging.Log4Net.Loggers;
-using DevFramework.Core.Aspects.Postsharp.LogAspects;
+using DevFramework.Core.Aspects.Postsharp.PerformanceAspect;
+using System.Diagnostics;
+using System.Threading;
+using DevFramework.Core.Aspects.Postsharp.AuthorizationAspects;
 
 namespace DevFramework.Northwind.Business.Concrate.Managers
 {
+   // [LogAspect(typeof(FileLogger))] buraya yazmak yerine assembly infoya yazarak tüm classların loglaması gerçekleştirilebilir.
     public class ProductManager : IProductService
     {
         private IProductDal _productDal;
@@ -22,7 +25,7 @@ namespace DevFramework.Northwind.Business.Concrate.Managers
         }
 
         [FluentValidationAspect(typeof(ProductValidator))]
-        [CacheRemoveAspect(typeof(MemoryCacheManager))]
+        [CacheRemoveAspect(typeof(MemoryCacheManager))] 
         public Product Add(Product product)
         {
            // ValidatorTool.FluentValidate(new ProductValidator(), product);
@@ -30,9 +33,11 @@ namespace DevFramework.Northwind.Business.Concrate.Managers
         }
 
         [CacheAspect(typeof(MemoryCacheManager))]
-        [LogAspect(typeof(DatabaseLogger))]
+        [PerformanceCounterAspect(2)]
+        [SecuredOperation(Roles="Admin,Editor")]
         public List<Product> GetAll()
         {
+            Thread.Sleep(3000);
             return _productDal.GetList();
         }
 
