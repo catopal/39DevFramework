@@ -11,6 +11,8 @@ using DevFramework.Core.Aspects.Postsharp.PerformanceAspect;
 using System.Diagnostics;
 using System.Threading;
 using DevFramework.Core.Aspects.Postsharp.AuthorizationAspects;
+using AutoMapper;
+using DevFramework.Core.Utilities.Mappings;
 
 namespace DevFramework.Northwind.Business.Concrate.Managers
 {
@@ -18,10 +20,12 @@ namespace DevFramework.Northwind.Business.Concrate.Managers
     public class ProductManager : IProductService
     {
         private IProductDal _productDal;
+        private readonly IMapper _mapper;
 
-        public ProductManager(IProductDal productDal)
+        public ProductManager(IProductDal productDal, IMapper mapper)
         {
             _productDal = productDal;
+            _mapper = mapper;
         }
 
         [FluentValidationAspect(typeof(ProductValidator))]
@@ -34,11 +38,14 @@ namespace DevFramework.Northwind.Business.Concrate.Managers
 
         [CacheAspect(typeof(MemoryCacheManager))]
         [PerformanceCounterAspect(2)]
-        [SecuredOperation(Roles="Admin,Editor")]
+        //[SecuredOperation(Roles="Admin,Editor")]
         public List<Product> GetAll()
         {
-            Thread.Sleep(3000);
-            return _productDal.GetList();
+            // return _productDal.GetList();
+
+            List<Product> products = _mapper.Map<List<Product>>(_productDal.GetList());
+            return products;
+
         }
 
         public Product GetById(int id)
